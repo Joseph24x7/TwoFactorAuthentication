@@ -25,20 +25,10 @@ spring:
    mail:
       host: smtp.gmail.com
       port: 587
-      username: rabbitmqdocker@gmail.com
-      password: sosiqoxkyqtktxhs
+      username: gmail.com
+      password: password
       properties.mail.smtp.auth: true
       properties.mail.smtp.starttls.enable: true
-
-   kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: smtp-2fa-consumer
-    producer:
-      acks: all
-      retries: 3
-      batch-size: 16384
-      buffer-memory: 33554432
 
 management:
    endpoints:

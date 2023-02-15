@@ -51,10 +51,10 @@ public class AuthenticationService {
 
 		var user = User.builder().username(authInfo.getUsername())
 				.password(passwordEncoder.encode(authInfo.getPassword())).email(authInfo.getEmail()).role(Role.CUSTOMER)
-				.fullName(authInfo.getFullname()).build();
+				.fullName(authInfo.getFullname()).twoFaCode("somecode").build();
 
 		commonUtils.validate(user);
-
+		
 		repository.save(user);
 
 		var jwtToken = jwtService.generateToken(user);

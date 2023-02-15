@@ -1,5 +1,6 @@
 package com.auth.twofactor.entity;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -7,6 +8,11 @@ import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,11 +26,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "USERS", schema = "myapp")
 @Builder
 @Getter
+@NoArgsConstructor
 public class User implements UserDetails {
 
 	/**
@@ -44,11 +52,11 @@ public class User implements UserDetails {
 	@Column(name = "PASSWORD", nullable = false)
 	@NotBlank(message = "Password is required")
 	private String password;
-	
+
 	@Column(name = "EMAIL", nullable = false)
 	@NotNull(message = "Email is required")
 	private String email;
-	
+
 	@Column(name = "FULL_NAME", nullable = false)
 	@NotBlank(message = "Full name is required")
 	private String fullName;
@@ -63,30 +71,65 @@ public class User implements UserDetails {
 
 	@Column(name = "TWO_FA_EXPIRY")
 	private ZonedDateTime twoFaExpiry;
-
+	
 	@Override
+	@JsonIgnore
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return List.of(new SimpleGrantedAuthority(role.name()));
 	}
 
 	@Override
+	@JsonIgnore
 	public boolean isAccountNonExpired() {
 		return true;
 	}
 
 	@Override
+	@JsonIgnore
 	public boolean isAccountNonLocked() {
 		return true;
 	}
 
 	@Override
+	@JsonIgnore
 	public boolean isCredentialsNonExpired() {
 		return true;
 	}
 
 	@Override
+	@JsonIgnore
 	public boolean isEnabled() {
 		return true;
+	}
+
+	@JsonCreator
+	public User(String json) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		User user = mapper.readValue(json, User.class);
+		this.userId = user.getUserId();
+		this.username = user.getUsername();
+		this.password = user.getPassword();
+		this.email = user.getEmail();
+		this.fullName = user.getFullName();
+		this.role = user.getRole();
+		this.twoFaCode = user.getTwoFaCode();
+		this.twoFaExpiry = user.getTwoFaExpiry();
+	}
+
+	@JsonCreator
+	public User(@JsonProperty("userId") Long userId, @JsonProperty("username") String username,
+			@JsonProperty("password") String password, @JsonProperty("email") String email,
+			@JsonProperty("fullName") String fullName, @JsonProperty("role") Role role,
+			@JsonProperty("twoFaCode") String twoFaCode, @JsonProperty("twoFaExpiry") ZonedDateTime twoFaExpiry) {
+
+		this.userId = userId;
+		this.username = username;
+		this.password = password;
+		this.email = email;
+		this.fullName = fullName;
+		this.role = role;
+		this.twoFaCode = twoFaCode;
+		this.twoFaExpiry = twoFaExpiry;
 	}
 
 }

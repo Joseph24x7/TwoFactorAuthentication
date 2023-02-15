@@ -14,13 +14,13 @@ public class EmailService {
 
 	private final JavaMailSender javaMailSender;
 
-	public void sendOtpEmail(User user, String otp) {
+	public void sendOtpEmail(User user) {
 		
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		mailMessage.setTo(user.getEmail());
 		mailMessage.setSubject("OTP for Login");
 		
-		mailMessage.setText("Dear " + user.getFullName() + ",\n\n Your OTP for login is: " + otp + ".\n\n"
+		mailMessage.setText("Dear " + user.getFullName() + ",\n\n Your OTP for login is: " + "code" + ".\n\n"
 				+ "Please enter this OTP to proceed with your login.\n\n" + "Thank you for choosing us.\n\n"
 				+ "Warm Regards,\n" + "Book My Gift Team");
 		
