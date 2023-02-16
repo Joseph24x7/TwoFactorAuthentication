@@ -1,6 +1,8 @@
 
 package com.auth.twofactor.controller;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,13 +24,23 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/auth")
 @OpenAPIDefinition(info = @Info(title = "Authentication Management", version = "0.0.1"))
 @RequiredArgsConstructor
+@RefreshScope
 public class AuthenticationController {
+
+	@Value("${mail.host}")
+	private String host;
+
+	@Value("${mail.port}")
+	private int port;
 
 	private final AuthenticationService authenticationService;
 	private final ObservationRegistry observationRegistry;
 
 	@PostMapping("/register")
 	public AuthResponse register(@RequestBody @Valid AuthRequest authRequest, HttpServletRequest request) {
+
+		System.out.println("smtp" + host);
+		System.out.println("smtp" + port);
 
 		return Observation.createNotStarted(request.getRequestURI().substring(1), observationRegistry)
 				.observe(() -> authenticationService.register(authRequest));

@@ -3,8 +3,24 @@ server:
 
 spring:
 
+   application:
+    name: bookmygift-jdbc
+   
+   profiles:
+    active: jdbc
+
+   cloud:
+    config:
+      uri: http://localhost:8000
+      profile: jdbc
+      label: master
+      server:
+        jdbc:
+          sql: "SELECT key, value from myapp.CONFIG_PROPERTIES where APPLICATION=? and PROFILE=? and LABEL=?"
+          order: 1
+
    datasource:
-      url: jdbc:postgresql://localhost:5432/myuser
+      url: jdbc:postgresql://localhost:5432/myuser?currentSchema=myapp
       username: myuser
       password: mypassword
 
@@ -23,19 +39,18 @@ spring:
       password: password
    
    mail:
-      host: smtp.gmail.com
-      port: 587
-      username: gmail.com
-      password: password
-      properties.mail.smtp.auth: true
-      properties.mail.smtp.starttls.enable: true
+      host: ${mail.host:}
+      port: ${mail.port:}
+      username: ${mail.username:}
+      password: ${mail.password:}
+      properties.mail.smtp.auth: ${mail.properties.mail.smtp.auth:}
+      properties.mail.smtp.starttls.enable: ${mail.properties.mail.smtp.starttls.enable:}
 
 management:
    endpoints:
       web:
          exposure:
             include: "*"
-            exclude: beans
    health:
       show-details: always
       
