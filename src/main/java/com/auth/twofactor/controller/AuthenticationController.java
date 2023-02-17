@@ -31,7 +31,7 @@ public class AuthenticationController {
 	private String host;
 
 	@Value("${mail.port}")
-	private int port;
+	private String port;
 
 	private final AuthenticationService authenticationService;
 	private final ObservationRegistry observationRegistry;

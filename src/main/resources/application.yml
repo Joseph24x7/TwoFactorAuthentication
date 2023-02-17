@@ -1,26 +1,13 @@
 server:
-   port: 8000
+   port: 8888
 
 spring:
 
    application:
-    name: bookmygift-jdbc
-   
-   profiles:
-    active: jdbc
-
-   cloud:
-    config:
-      uri: http://localhost:8000
-      profile: jdbc
-      label: master
-      server:
-        jdbc:
-          sql: "SELECT key, value from myapp.CONFIG_PROPERTIES where APPLICATION=? and PROFILE=? and LABEL=?"
-          order: 1
+    name: bookmygift
 
    datasource:
-      url: jdbc:postgresql://localhost:5432/myuser?currentSchema=myapp
+      url: jdbc:postgresql://localhost:5432/myuser
       username: myuser
       password: mypassword
 
@@ -39,12 +26,12 @@ spring:
       password: password
    
    mail:
-      host: ${mail.host:}
-      port: ${mail.port:}
-      username: ${mail.username:}
-      password: ${mail.password:}
-      properties.mail.smtp.auth: ${mail.properties.mail.smtp.auth:}
-      properties.mail.smtp.starttls.enable: ${mail.properties.mail.smtp.starttls.enable:}
+      host: ${mail.host:123}
+      port: ${mail.port:122}
+      username: ${mail.username:333}
+      password: ${mail.password:333}
+      properties.mail.smtp.auth: ${mail.properties.mail.smtp.auth:333}
+      properties.mail.smtp.starttls.enable: ${mail.properties.mail.smtp.starttls.enable:222}
 
 management:
    endpoints:
