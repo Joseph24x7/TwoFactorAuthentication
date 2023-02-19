@@ -133,6 +133,7 @@
         </dependencies>
     </dependencyManagement>
 	<build>
+		<finalName>twofactorauth</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
