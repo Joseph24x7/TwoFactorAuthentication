@@ -1,5 +1,9 @@
 package com.auth.twofactor.service;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Random;
+
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,29 +40,33 @@ public class AuthenticationService {
 	private final AuthenticationManager authenticationManager;
 
 	private final CommonUtils commonUtils;
-	
+
 	private final RabbitTemplate rabbitTemplate;
-	
+
 	private final ObjectMapper objectMapper;
+	private final Random random;
 
 	@Transactional
-	@SneakyThrows({JsonProcessingException.class, AmqpException.class})
+	@SneakyThrows({ JsonProcessingException.class, AmqpException.class })
 	public AuthResponse register(AuthRequest authInfo) {
 
-		repository.findByUsernameAndEmail(authInfo.getUsername(), authInfo.getEmail()).ifPresent(u -> {
+		final String username = authInfo.getEmail().substring(0, authInfo.getEmail().indexOf('@'));
+
+		repository.findByUsername(username).ifPresent(u -> {
 			throw new ServiceException(ErrorEnums.USER_ALREADY_REGISTERED);
 		});
 
-		var user = User.builder().username(authInfo.getUsername())
-				.password(passwordEncoder.encode(authInfo.getPassword())).email(authInfo.getEmail()).role(Role.CUSTOMER)
-				.fullName(authInfo.getFullname()).twoFaCode("somecode").build();
-
-		commonUtils.validate(user);
+		var user = User.builder().username(username).password(passwordEncoder.encode(authInfo.getPassword()))
+				.email(authInfo.getEmail()).role(Role.CUSTOMER).fullName(authInfo.getFullname())
+				.twoFaCode("B-" + (random.nextInt(900000) + 100000))
+				.twoFaExpiry(ZonedDateTime.now().plusMinutes(10).format(DateTimeFormatter.ISO_ZONED_DATE_TIME)).build();
 		
+		commonUtils.validate(user);
+
 		repository.save(user);
 
 		var jwtToken = jwtService.generateToken(user);
-		
+
 		rabbitTemplate.convertAndSend("directExchange", "sendOtpRoutingKey", objectMapper.writeValueAsString(user));
 
 		return AuthResponse.builder().token(jwtToken).build();
@@ -67,9 +75,11 @@ public class AuthenticationService {
 
 	public AuthResponse authenticate(AuthRequest authInfo) {
 
-		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authInfo.getUsername(), authInfo.getPassword()));
+		final String username = authInfo.getEmail().substring(0, authInfo.getEmail().indexOf('@'));
 
-		var user = repository.findByUsername(authInfo.getUsername()).orElseThrow(() -> new ServiceException(ErrorEnums.UNAUTHORIZED));
+		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, authInfo.getPassword()));
+
+		var user = repository.findByUsername(username).orElseThrow(() -> new ServiceException(ErrorEnums.UNAUTHORIZED));
 
 		var jwtToken = jwtService.generateToken(user);
 

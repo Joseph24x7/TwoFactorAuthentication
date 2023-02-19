@@ -1,7 +1,6 @@
 package com.auth.twofactor.entity;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -66,11 +65,13 @@ public class User implements UserDetails {
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
+	@NotNull(message = "twoFaCode is required")
 	@Column(name = "TWO_FA_CODE")
 	private String twoFaCode;
 
+	@NotNull(message = "twoFaExpiry is required")
 	@Column(name = "TWO_FA_EXPIRY")
-	private ZonedDateTime twoFaExpiry;
+	private String twoFaExpiry;
 	
 	@Override
 	@JsonIgnore
@@ -120,7 +121,7 @@ public class User implements UserDetails {
 	public User(@JsonProperty("userId") Long userId, @JsonProperty("username") String username,
 			@JsonProperty("password") String password, @JsonProperty("email") String email,
 			@JsonProperty("fullName") String fullName, @JsonProperty("role") Role role,
-			@JsonProperty("twoFaCode") String twoFaCode, @JsonProperty("twoFaExpiry") ZonedDateTime twoFaExpiry) {
+			@JsonProperty("twoFaCode") String twoFaCode, @JsonProperty("twoFaExpiry") String twoFaExpiry) {
 
 		this.userId = userId;
 		this.username = username;
