@@ -42,7 +42,7 @@ public class AuthenticationService {
 	private final ObjectMapper objectMapper;
 
 	@Transactional
-	//@SneakyThrows({JsonProcessingException.class, AmqpException.class})
+	@SneakyThrows({JsonProcessingException.class, AmqpException.class})
 	public AuthResponse register(AuthRequest authInfo) {
 
 		repository.findByUsernameAndEmail(authInfo.getUsername(), authInfo.getEmail()).ifPresent(u -> {
@@ -59,7 +59,7 @@ public class AuthenticationService {
 
 		var jwtToken = jwtService.generateToken(user);
 		
-		//rabbitTemplate.convertAndSend("directExchange", "sendOtpRoutingKey", objectMapper.writeValueAsString(user));
+		rabbitTemplate.convertAndSend("directExchange", "sendOtpRoutingKey", objectMapper.writeValueAsString(user));
 
 		return AuthResponse.builder().token(jwtToken).build();
 

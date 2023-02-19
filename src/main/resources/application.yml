@@ -1,49 +1,43 @@
 server:
-   port: 8888
+   port: 8000
 
 spring:
-
-   application:
-    name: bookmygift
-
-   datasource:
-      url: jdbc:postgresql://localhost:5432/myuser
-      username: myuser
-      password: mypassword
-
-   jpa:
+  datasource: 
+    url: ${datasource.url:}
+    username: ${datasource.username:}
+    password: ${datasource.password:}
+  jpa:
+    hibernate:
+      ddl-auto: ${jpa.hibernate.ddl-auto:}
+    show-sql: ${jpa.show-sql:}
+    properties:
       hibernate:
-         ddl-auto: update
-      show-sql: true
-      properties:
-         hibernate:
-            dialect: org.hibernate.dialect.PostgreSQLDialect
- 
-   rabbitmq:
-      host: localhost
-      port: 5672
-      username: admin
-      password: password
-   
-   mail:
-      host: ${mail.host:123}
-      port: ${mail.port:122}
-      username: ${mail.username:333}
-      password: ${mail.password:333}
-      properties.mail.smtp.auth: ${mail.properties.mail.smtp.auth:333}
-      properties.mail.smtp.starttls.enable: ${mail.properties.mail.smtp.starttls.enable:222}
+        dialect: ${jpa.properties.hibernate.dialect:}
+  rabbitmq:
+    host: ${rabbitmq.host:}
+    port: ${rabbitmq.port:}
+    username: ${rabbitmq.username:}
+    password: ${rabbitmq.password:}
+  mail:
+    host: ${mail.host:}
+    port: ${mail.port:}
+    username: ${mail.username:}
+    password: ${mail.password:}
+    properties.mail.smtp.auth: ${mail.properties.mail.smtp.auth:}
+    properties.mail.smtp.starttls.enable: ${mail.properties.mail.smtp.starttls.enable:}
 
 management:
-   endpoints:
-      web:
-         exposure:
-            include: "*"
-   health:
-      show-details: always
-      
+  endpoints:
+    web:
+      exposure:
+        include: ${endpoints.web.exposure.include:}
+        exclude: ${endpoints.web.exposure.exclude:}
+  health:
+    show-details: ${health.show-details:}
+
 logging:
-   pattern:
-      file: '%d{yyyy-MM-dd HH:mm:ss,SSS} %5p [%t] %c [%M] - %m%n'
-   level:
-      com.bookmygift: DEBUG
-      org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+  pattern:
+    file: ${pattern.file:}
+  level:
+    com.bookmygift: ${level.com.bookmygift:}
+    org.springframework.web.filter.CommonsRequestLoggingFilter: ${level.org.springframework.web.filter.CommonsRequestLoggingFilter:}

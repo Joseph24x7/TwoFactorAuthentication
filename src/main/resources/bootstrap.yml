@@ -1,12 +1,18 @@
 spring:
-   profiles:
-    active: jdbc
+   application:
+     name: two-factor-auth
+
    cloud:
-    config:
-      uri: http://localhost:8888
-      profile: jdbc
-      label: master
-      server:
-        jdbc:
-          sql: "SELECT key, value from myapp.CONFIG_PROPERTIES where APPLICATION=? and PROFILE=? and LABEL=?"
-          order: 1
+     config:
+       uri: ${cloud.config.uri:http://localhost:8888}
+       profile: ${cloud.config.profile:jdbc}
+       label: ${cloud.config.label:}
+       name: ${cloud.config.name:bookmygift}
+   config:
+     activate:
+       on-profile:
+         active: ${config.activate.on-profile.active:}
+
+management:
+  security:
+    enabled: ${security.enabled:}
