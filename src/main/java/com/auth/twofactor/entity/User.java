@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "USERS", schema = "myapp")
-@Builder
+@Builder(toBuilder=true)
 @Getter
 @NoArgsConstructor
 public class User implements UserDetails {

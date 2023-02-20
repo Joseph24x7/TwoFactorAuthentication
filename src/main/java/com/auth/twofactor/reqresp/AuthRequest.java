@@ -32,7 +32,7 @@ public class AuthRequest implements Serializable {
     private String password;
 
     @NotBlank(message = "Full name is required")
-    @Size(min=3, max=20, message = "Full name must be between 3 and 20 characters")
+    @Size(min=3, max=50, message = "Full name must be between 3 and 50 characters")
     private String fullname;
     
 }

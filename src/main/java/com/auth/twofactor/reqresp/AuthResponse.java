@@ -1,7 +1,5 @@
 package com.auth.twofactor.reqresp;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -15,12 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(value = Include.NON_NULL)
-public class AuthResponse implements Serializable {
+public class AuthResponse {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private String token;
 	private AuthenticationStatus authenticationStatus;
 
