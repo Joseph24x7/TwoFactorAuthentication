@@ -1,7 +1,5 @@
 package com.auth.twofactor.reqresp;
 
-import java.io.Serializable;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -15,13 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthRequest implements Serializable {
+public class AuthRequest {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
 	@NotBlank(message = "Email is required")
     @Email(message = "Email must be in the format of example@domain.com")
     private String email;

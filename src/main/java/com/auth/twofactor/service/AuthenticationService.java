@@ -46,16 +46,16 @@ public class AuthenticationService {
 
 	@Transactional
 	@SneakyThrows({ JsonProcessingException.class })
-	public AuthResponse register(AuthRequest authInfo) {
+	public AuthResponse register(AuthRequest authRequest) {
 
-		final String username = authInfo.getEmail().substring(0, authInfo.getEmail().indexOf('@'));
+		final String username = authRequest.getEmail().substring(0, authRequest.getEmail().indexOf('@'));
 
 		repository.findByUsername(username).ifPresent(u -> {
 			throw new ServiceException(ErrorEnums.USER_ALREADY_REGISTERED);
 		});
 
-		var user = User.builder().username(username).password(passwordEncoder.encode(authInfo.getPassword()))
-				.email(authInfo.getEmail()).role(Role.CUSTOMER).fullName(authInfo.getFullname())
+		var user = User.builder().username(username).password(passwordEncoder.encode(authRequest.getPassword()))
+				.email(authRequest.getEmail()).role(Role.CUSTOMER).fullName(authRequest.getFullname())
 				.twoFaCode("B-" + (random.nextInt(900000) + 100000))
 				.twoFaExpiry(ZonedDateTime.now().plusMinutes(10).format(DateTimeFormatter.ISO_ZONED_DATE_TIME)).build();
 		
@@ -73,11 +73,11 @@ public class AuthenticationService {
 
 	@Transactional
 	@SneakyThrows({ JsonProcessingException.class })
-	public AuthResponse authenticate(AuthRequest authInfo) {
+	public AuthResponse authenticate(AuthRequest authRequest) {
 
-		final String username = authInfo.getEmail().substring(0, authInfo.getEmail().indexOf('@'));
+		final String username = authRequest.getEmail().substring(0, authRequest.getEmail().indexOf('@'));
 
-		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, authInfo.getPassword()));
+		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, authRequest.getPassword()));
 
 		var user = repository.findByUsername(username).orElseThrow(() -> new ServiceException(ErrorEnums.UNAUTHORIZED));
 		
@@ -91,6 +91,10 @@ public class AuthenticationService {
 
 		return AuthResponse.builder().token(jwtToken).authenticationStatus(AuthenticationStatus.SUCCESS).build();
 
+	}
+
+	public AuthResponse verify(AuthRequest authRequest) {
+		return null;
 	}
 
 }

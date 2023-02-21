@@ -44,5 +44,11 @@ public class AuthenticationController {
 				.observe(() -> authenticationService.authenticate(authRequest));
 
 	}
+	
+	@PostMapping("/verify")
+	public AuthResponse verify(@RequestBody @Valid AuthRequest authRequest, HttpServletRequest request) {
+		return Observation.createNotStarted(request.getRequestURI().substring(1), observationRegistry)
+				.observe(() -> authenticationService.verify(authRequest));
+	}
 
 }
