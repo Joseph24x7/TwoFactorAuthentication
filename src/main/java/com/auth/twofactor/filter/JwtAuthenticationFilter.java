@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				
 			}else if (StringUtils.isEmpty(authHeader)) {
 				
-				throw new ServiceException(ErrorEnums.TOKEN_REQUIRED);
+				throw new ServiceException(ErrorEnums.AUTHORIZATION_REQUIRED);
 				
 			}
 
@@ -87,7 +87,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-			response.getWriter().write(objectMapper.writeValueAsString(populateException(ErrorEnums.UNAUTHORIZED.getHttpStatus(),e.getMessage(), ErrorEnums.UNAUTHORIZED.getErrorCode(), request)));
+			response.getWriter().write(objectMapper.writeValueAsString(populateException(ErrorEnums.INVALID_CREDENTIALS.getHttpStatus(),e.getMessage(), ErrorEnums.INVALID_CREDENTIALS.getErrorCode(), request)));
 		}
 
 	}

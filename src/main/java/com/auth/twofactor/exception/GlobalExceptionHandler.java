@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -38,16 +37,16 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(Exception.class)
 	public ProblemDetail handleException(Exception exception, HttpServletRequest request) {
 
-		return populateException(ErrorEnums.GENERAL_EXCEPTION.getHttpStatus(), exception.getMessage(),
-				ErrorEnums.GENERAL_EXCEPTION.getErrorCode(), request);
+		return populateException(ErrorEnums.INTERNAL_SERVER_ERROR.getHttpStatus(), exception.getMessage(),
+				ErrorEnums.INTERNAL_SERVER_ERROR.getErrorCode(), request);
 
 	}
 
 	@ExceptionHandler({ BadCredentialsException.class, MalformedJwtException.class })
 	public ProblemDetail handleCredentialsException(Exception exception, HttpServletRequest request) {
 
-		return populateException(ErrorEnums.UNAUTHORIZED.getHttpStatus(), exception.getMessage(),
-				ErrorEnums.UNAUTHORIZED.getErrorCode(), request);
+		return populateException(ErrorEnums.INVALID_CREDENTIALS.getHttpStatus(), exception.getMessage(),
+				ErrorEnums.INVALID_CREDENTIALS.getErrorCode(), request);
 
 	}
 
@@ -60,8 +59,8 @@ public class GlobalExceptionHandler {
 			errors.add(violation.getMessage());
 		}
 
-		return populateException(HttpStatus.BAD_REQUEST, List.copyOf(errors).toString(), HttpStatus.BAD_REQUEST.getReasonPhrase(),
-				request);
+		return populateException(HttpStatus.BAD_REQUEST, List.copyOf(errors).toString(),
+				HttpStatus.BAD_REQUEST.getReasonPhrase(), request);
 
 	}
 
@@ -70,12 +69,10 @@ public class GlobalExceptionHandler {
 			HttpServletRequest request) {
 
 		List<String> errors = new ArrayList<>();
-		for (FieldError error : validationEx.getBindingResult().getFieldErrors()) {
-			errors.add(error.getDefaultMessage());
-		}
+		validationEx.getBindingResult().getFieldErrors().forEach(error -> errors.add(error.getDefaultMessage()));
 
-		return populateException(HttpStatus.BAD_REQUEST, List.copyOf(errors).toString(), HttpStatus.BAD_REQUEST.getReasonPhrase(),
-				request);
+		return populateException(HttpStatus.BAD_REQUEST, List.copyOf(errors).toString(),
+				HttpStatus.BAD_REQUEST.getReasonPhrase(), request);
 	}
 
 	public ProblemDetail populateException(HttpStatus httpStatus, String errorDescription, String errorCode,

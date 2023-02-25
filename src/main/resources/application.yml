@@ -25,6 +25,18 @@ spring:
     password: ${mail.password:}
     properties.mail.smtp.auth: ${mail.properties.mail.smtp.auth:}
     properties.mail.smtp.starttls.enable: ${mail.properties.mail.smtp.starttls.enable:}
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: my-group-id
+      auto-offset-reset: earliest
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    template:
+      default-topic: mytopic
 
 management:
   endpoints:

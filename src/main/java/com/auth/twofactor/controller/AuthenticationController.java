@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.auth.twofactor.reqresp.AuthRequest;
 import com.auth.twofactor.reqresp.AuthResponse;
+import com.auth.twofactor.reqresp.VerifyRequest;
 import com.auth.twofactor.service.AuthenticationService;
 
 import io.micrometer.observation.Observation;
@@ -44,9 +45,9 @@ public class AuthenticationController {
 				.observe(() -> authenticationService.authenticate(authRequest));
 
 	}
-	
+
 	@PostMapping("/verify")
-	public AuthResponse verify(@RequestBody @Valid AuthRequest authRequest, HttpServletRequest request) {
+	public AuthResponse verify(@RequestBody @Valid VerifyRequest authRequest, HttpServletRequest request) {
 		return Observation.createNotStarted(request.getRequestURI().substring(1), observationRegistry)
 				.observe(() -> authenticationService.verify(authRequest));
 	}
