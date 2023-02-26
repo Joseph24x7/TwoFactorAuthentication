@@ -8,7 +8,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,7 +44,7 @@ public class AuthenticationService {
 	private final CommonUtils commonUtils;
 
 	private final RabbitTemplate rabbitTemplate;
-	private final KafkaTemplate<String, VerifyRequest> kafkaTemplate;
+	private final KafkaTemplate<String, User> kafkaTemplate;
 
 	private final ObjectMapper objectMapper;
 	private final Random random;
@@ -64,13 +63,13 @@ public class AuthenticationService {
 				.email(authRequest.getEmail()).role(Role.CUSTOMER).fullName(authRequest.getFullname())
 				.twoFaCode("B-" + (random.nextInt(900000) + 100000))
 				.twoFaExpiry(ZonedDateTime.now().plusMinutes(10).format(DateTimeFormatter.ISO_ZONED_DATE_TIME)).build();
-		
+
 		commonUtils.validate(user);
 
 		rabbitTemplate.convertAndSend("directExchange", "sendOtpRoutingKey", objectMapper.writeValueAsString(user));
-		
+
 		var jwtToken = jwtService.generateToken(user);
-		
+
 		repository.save(user);
 
 		return AuthResponse.builder().token(jwtToken).build();
@@ -79,94 +78,78 @@ public class AuthenticationService {
 
 	@Transactional
 	@SneakyThrows({ JsonProcessingException.class })
-	public AuthResponse authenticate(AuthRequest authRequest) {
+	public AuthResponse authenticate(AuthRequest authRequest, boolean isVerification) {
 
 		final String username = authRequest.getEmail().substring(0, authRequest.getEmail().indexOf('@'));
 
-		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, authRequest.getPassword()));
+		String jwtToken = null;
 
-		var user = repository.findByUsername(username).orElseThrow(() -> new ServiceException(ErrorEnums.INVALID_CREDENTIALS));
-		
-		user.toBuilder().twoFaCode("B-" + (random.nextInt(900000) + 100000)).twoFaExpiry(ZonedDateTime.now().plusMinutes(10).format(DateTimeFormatter.ISO_ZONED_DATE_TIME)).build();
+		authenticationManager
+				.authenticate(new UsernamePasswordAuthenticationToken(username, authRequest.getPassword()));
 
-		rabbitTemplate.convertAndSend("directExchange", "sendOtpRoutingKey", objectMapper.writeValueAsString(user));
-		
-		var jwtToken = jwtService.generateToken(user);
-		
-		repository.save(user);
+		var user = repository.findByUsername(username)
+				.orElseThrow(() -> new ServiceException(ErrorEnums.INVALID_CREDENTIALS));
 
-		return AuthResponse.builder().token(jwtToken).authenticationStatus(AuthenticationStatus.SUCCESS).build();
+		if (!isVerification) {
 
-	}
+			user.toBuilder().twoFaCode("B-" + (random.nextInt(900000) + 100000))
+					.twoFaExpiry(ZonedDateTime.now().plusMinutes(10).format(DateTimeFormatter.ISO_ZONED_DATE_TIME))
+					.build();
 
-	/*public AuthResponse verify(VerifyRequest verifyRequest) {
-		
-		final String username = verifyRequest.getEmail().substring(0, verifyRequest.getEmail().indexOf('@'));
+			rabbitTemplate.convertAndSend("directExchange", "sendOtpRoutingKey", objectMapper.writeValueAsString(user));
 
-		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, verifyRequest.getPassword()));
+			repository.save(user);
 
-		var user = repository.findByUsername(username).orElseThrow(() -> new ServiceException(ErrorEnums.INVALID_CREDENTIALS));
-		
-		if(user.getTwoFaCode().equalsIgnoreCase(verifyRequest.getTwoFaCode())) {
-			
-			var jwtToken = jwtService.generateToken(user);
-			
-			return AuthResponse.builder().token(jwtToken).authenticationStatus(AuthenticationStatus.SUCCESS).build();
-			
-		}else {
-			
-			throw new ServiceException(ErrorEnums.AUTHORIZATION_REQUIRED);
-			
+			jwtToken = jwtService.generateToken(user);
+
 		}
-	}*/
-	
-	public AuthResponse verify(VerifyRequest verifyRequest) {
-	    CompletableFuture<AuthResponse> completableFuture = new CompletableFuture<>();
-	    
-	    CompletableFuture<SendResult<String, VerifyRequest>> completableFutureSendResult = CompletableFuture.supplyAsync(() -> {
-	        try {
-	            return kafkaTemplate.send("mytopic", verifyRequest).get();
-	        } catch (InterruptedException | ExecutionException e) {
-	            completableFuture.completeExceptionally(e);
-	            Thread.currentThread().interrupt();
-	            throw new ServiceException(ErrorEnums.INTERNAL_SERVER_ERROR);
-	        }
-	    });
 
-	    completableFutureSendResult.thenAcceptAsync(result -> {
-	        // Process the verification request asynchronously
-	        final String username = verifyRequest.getEmail().substring(0, verifyRequest.getEmail().indexOf('@'));
-	        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, verifyRequest.getPassword()));
+		return AuthResponse.builder().token(jwtToken).user(user).authenticationStatus(AuthenticationStatus.SUCCESS)
+				.build();
 
-	        var user = repository.findByUsername(username).orElseThrow(() -> new ServiceException(ErrorEnums.INVALID_CREDENTIALS));
-	        
-	        if(user.getTwoFaCode().equalsIgnoreCase(verifyRequest.getTwoFaCode())) {
-	            var jwtToken = jwtService.generateToken(user);
-	            AuthResponse authResponse = AuthResponse.builder().token(jwtToken).authenticationStatus(AuthenticationStatus.SUCCESS).build();
-	            completableFuture.complete(authResponse);
-	        } else {
-	            completableFuture.completeExceptionally(new ServiceException(ErrorEnums.INVALID_2FA_CODE));
-	        }
-	    });
-
-	    completableFutureSendResult.exceptionally(ex -> {
-	        // handle the exception
-	        completableFuture.completeExceptionally(ex);
-	        return null;
-	    });
-
-	    try {
-	        return completableFuture.get();
-	    } catch (InterruptedException | ExecutionException e) {
-	    	 Thread.currentThread().interrupt();
-	        throw new ServiceException(ErrorEnums.INTERNAL_SERVER_ERROR);
-	    }
 	}
 
+	public AuthResponse verify(VerifyRequest verifyRequest) {
 
+		CompletableFuture<AuthResponse> completableFuture = new CompletableFuture<>();
 
+		// runAsync is used to produce a result asynchronously
+		CompletableFuture<Void> authCheckFuture = CompletableFuture.runAsync(() -> {
+			AuthResponse authResponse = authenticate(verifyRequest, true);
+			if (authResponse.getAuthenticationStatus().equals(AuthenticationStatus.SUCCESS)
+					&& authResponse.getUser().getTwoFaCode().equalsIgnoreCase(verifyRequest.getTwoFaCode())) {
+				completableFuture.complete(authResponse);
+			} else {
+				completableFuture.completeExceptionally(new ServiceException(ErrorEnums.INVALID_2FA_CODE));
+			}
+		});
 
+		try {
+			
+			CompletableFuture.allOf(authCheckFuture).get();
+			AuthResponse authResponse = completableFuture.get();
 
+			authCheckFuture.thenApplyAsync(result -> {
+				try {
+					return kafkaTemplate.send("mytopic", authResponse.getUser()).get();
+				} catch (InterruptedException | ExecutionException e) {
+					Thread.currentThread().interrupt();
+					throw new ServiceException(ErrorEnums.INTERNAL_SERVER_ERROR);
+				}
+			}).exceptionally(ex -> {
+				completableFuture.completeExceptionally(ex);
+				throw new ServiceException(ErrorEnums.INTERNAL_SERVER_ERROR);
+			});
 
+			return authResponse;
+		} catch (InterruptedException | ExecutionException e) {
+			Thread.currentThread().interrupt();
+			if (e.getCause() instanceof ServiceException ex) {
+				ex = (ServiceException) e.getCause();
+				throw new ServiceException(ex.getErrorEnums());
+			}
+			throw new ServiceException(ErrorEnums.INTERNAL_SERVER_ERROR);
+		}
+	}
 
 }

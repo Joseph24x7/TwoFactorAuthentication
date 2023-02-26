@@ -1,5 +1,6 @@
 package com.auth.twofactor.reqresp;
 
+import com.auth.twofactor.entity.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -17,5 +18,6 @@ public class AuthResponse {
 
 	private String token;
 	private AuthenticationStatus authenticationStatus;
+	private User user;
 
 }

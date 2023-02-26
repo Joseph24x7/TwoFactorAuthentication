@@ -13,7 +13,7 @@ public enum ErrorEnums {
 	AUTHORIZATION_REQUIRED(HttpStatus.UNAUTHORIZED, "AUTHORIZATION_REQUIRED",
 			"Authorization token is required. Please provide a valid token to proceed."),
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR",
-			"Internal Server Error. Something went wrong on our end. Please try again later.");
+			"Something went wrong on our end. Please try again later.");
 
 	HttpStatus httpStatus;
 	String errorCode;

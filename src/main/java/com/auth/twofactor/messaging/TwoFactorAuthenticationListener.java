@@ -1,4 +1,4 @@
-package com.auth.twofactor.queue;
+package com.auth.twofactor.messaging;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;

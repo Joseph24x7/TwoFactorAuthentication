@@ -42,7 +42,7 @@ public class AuthenticationController {
 	public AuthResponse authenticate(@RequestBody AuthRequest authRequest, HttpServletRequest request) {
 
 		return Observation.createNotStarted(request.getRequestURI().substring(1), observationRegistry)
-				.observe(() -> authenticationService.authenticate(authRequest));
+				.observe(() -> authenticationService.authenticate(authRequest,false));
 
 	}
 
