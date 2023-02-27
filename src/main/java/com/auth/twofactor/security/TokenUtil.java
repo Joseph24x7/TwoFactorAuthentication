@@ -1,4 +1,4 @@
-package com.auth.twofactor.utils;
+package com.auth.twofactor.security;
 
 import java.security.Key;
 import java.util.Date;
@@ -6,10 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
-import com.auth.twofactor.repository.PropertiesRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -20,10 +19,11 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class TokenGenerator {
+public class TokenUtil {
 	
-	private final PropertiesRepository propertiesRepository;
-
+	@Value("${application.secret.key}")
+	private String secretKey;
+	
 	public String extractUsername(String token) {
 		return extractClaim(token, Claims::getSubject);
 	}
@@ -62,7 +62,7 @@ public class TokenGenerator {
 	}
 
 	private Key getSignInKey() {
-		var keyBytes = Decoders.BASE64.decode(propertiesRepository.findByPropName("SECRET_KEY").orElseThrow().getPropValue());
+		var keyBytes = Decoders.BASE64.decode(secretKey);
 		return Keys.hmacShaKeyFor(keyBytes);
 	}
 }

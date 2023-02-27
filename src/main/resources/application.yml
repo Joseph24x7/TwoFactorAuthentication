@@ -58,3 +58,7 @@ logging:
   level:
     com.bookmygift: ${level.com.bookmygift:}
     org.springframework.web.filter.CommonsRequestLoggingFilter: ${level.org.springframework.web.filter.CommonsRequestLoggingFilter:}
+    
+application:
+  secret:
+    key: ${secret-key:}

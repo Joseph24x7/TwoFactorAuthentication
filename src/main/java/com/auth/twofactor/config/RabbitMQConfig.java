@@ -37,14 +37,14 @@ public class RabbitMQConfig {
 	}
 
 	@Bean
-	public Binding sendOtpBinding(Queue sendOtp) {
-		return BindingBuilder.bind(sendOtp).to(directExchange()).with("sendOtpRoutingKey");
+	public Binding sendOtpBinding(Queue sendOtp, DirectExchange directExchange) {
+		return BindingBuilder.bind(sendOtp).to(directExchange).with("sendOtpRoutingKey");
 	}
 
 	@Bean
-	public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+	public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter jsonMessageConverter) {
 		final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-		rabbitTemplate.setMessageConverter(jsonMessageConverter());
+		rabbitTemplate.setMessageConverter(jsonMessageConverter);
 		return rabbitTemplate;
 	}
 

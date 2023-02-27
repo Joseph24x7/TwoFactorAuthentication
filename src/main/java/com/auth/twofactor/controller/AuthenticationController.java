@@ -34,7 +34,7 @@ public class AuthenticationController {
 	public AuthResponse register(@RequestBody @Valid AuthRequest authRequest, HttpServletRequest request) {
 
 		return Observation.createNotStarted(request.getRequestURI().substring(1), observationRegistry)
-				.observe(() -> authenticationService.register(authRequest));
+				.observe(() -> authenticationService.registerUser(authRequest));
 
 	}
 

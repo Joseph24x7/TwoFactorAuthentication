@@ -17,7 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.auth.twofactor.exception.ErrorEnums;
 import com.auth.twofactor.exception.ServiceException;
-import com.auth.twofactor.utils.TokenGenerator;
+import com.auth.twofactor.security.TokenUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.micrometer.common.util.StringUtils;
@@ -34,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 @Qualifier("JwtAuthenticationFilter")
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-	private final TokenGenerator jwtService;
+	private final TokenUtil jwtService;
 	private final ObservationRegistry observationRegistry;
 	private final UserDetailsService userDetailsService;
 	private final ObjectMapper objectMapper;

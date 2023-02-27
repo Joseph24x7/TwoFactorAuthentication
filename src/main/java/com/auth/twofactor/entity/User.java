@@ -23,15 +23,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "USERS", schema = "myapp")
-@Builder(toBuilder=true)
+@Builder(toBuilder = true)
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class User implements UserDetails {
 
 	/**
@@ -50,6 +52,7 @@ public class User implements UserDetails {
 
 	@Column(name = "PASSWORD", nullable = false)
 	@NotBlank(message = "Password is required")
+	@JsonIgnore
 	private String password;
 
 	@Column(name = "EMAIL", nullable = false)
@@ -72,7 +75,7 @@ public class User implements UserDetails {
 	@NotNull(message = "twoFaExpiry is required")
 	@Column(name = "TWO_FA_EXPIRY")
 	private String twoFaExpiry;
-	
+
 	@Override
 	@JsonIgnore
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -109,7 +112,6 @@ public class User implements UserDetails {
 		User user = mapper.readValue(json, User.class);
 		this.userId = user.getUserId();
 		this.username = user.getUsername();
-		this.password = user.getPassword();
 		this.email = user.getEmail();
 		this.fullName = user.getFullName();
 		this.role = user.getRole();
@@ -119,13 +121,12 @@ public class User implements UserDetails {
 
 	@JsonCreator
 	public User(@JsonProperty("userId") Long userId, @JsonProperty("username") String username,
-			@JsonProperty("password") String password, @JsonProperty("email") String email,
-			@JsonProperty("fullName") String fullName, @JsonProperty("role") Role role,
-			@JsonProperty("twoFaCode") String twoFaCode, @JsonProperty("twoFaExpiry") String twoFaExpiry) {
+			@JsonProperty("email") String email, @JsonProperty("fullName") String fullName,
+			@JsonProperty("role") Role role, @JsonProperty("twoFaCode") String twoFaCode,
+			@JsonProperty("twoFaExpiry") String twoFaExpiry) {
 
 		this.userId = userId;
 		this.username = username;
-		this.password = password;
 		this.email = email;
 		this.fullName = fullName;
 		this.role = role;
