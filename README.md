@@ -4,9 +4,9 @@ This project is a Spring Boot application that provides a RESTful API for user r
 
 This code defines a system design for an authentication service that provides the following functionality:
 
-User registration: creates a new user account, generates a unique username, sends a one-time password (OTP) to the user's phone or email, generates a JSON web token (JWT) for the user's session, and returns an authentication response with user info, JWT, and success status.
+User registration: creates a new user account, generates a unique username, sends a one-time password (OTP) to the user's email, generates a JSON web token (JWT) for the user's session, and returns an authentication response with user info, JWT, and success status.
 
-User authentication: validates the user's credentials, generates and stores a new two-factor authentication code, sends the OTP to the user's phone or email, generates a new JWT for the user's session, and returns an authentication response with user info, JWT, and success status.
+User authentication: validates the user's credentials, generates and stores a new two-factor authentication code, sends the OTP to the user's email, generates a new JWT for the user's session, and returns an authentication response with user info, JWT, and success status.
 
 Two-factor authentication verification: asynchronously authenticates the user's two-factor authentication code, sends a success notification with the AuthResponse and the completed CompletableFuture, and returns an authentication response with user info, JWT, and success status.
 
